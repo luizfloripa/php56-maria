@@ -1,0 +1,52 @@
+version: '3.6'
+services:
+  proxy:
+    container_name: proxy.local
+    image: jwilder/nginx-proxy:latest
+    volumes:
+      - '/var/run/docker.sock:/tmp/docker.sock:ro'
+      - './proxy.conf:/etc/nginx/conf.d/my_proxy.conf:ro'
+    ports:
+      - '80:80'
+    restart: unless-stopped
+    networks:
+      main:
+        aliases:
+          - proxy.local
+  db:
+    container_name: db.local  
+    image: mariadb
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: mysqlpass
+    networks:
+      main:
+        aliases:
+          - db.local      
+  adminer:
+    container_name: adminer.local  
+    image: adminer
+    restart: always
+    ports:
+      - 8082:8080
+    environment:
+       VIRTUAL_HOST: 'adminer.local'         
+    networks:
+      main:
+        aliases:
+          - adminer.local
+  web:
+    container_name: web.local  
+    image: luizfloripa/alpine-php56
+    volumes: 
+      - ./:/var/www/localhost
+    ports:
+      - "8081:80"
+    environment:
+       VIRTUAL_HOST: 'web.local'      
+    networks:
+      main:
+        aliases:
+          - web.local      
+networks:
+  main:
